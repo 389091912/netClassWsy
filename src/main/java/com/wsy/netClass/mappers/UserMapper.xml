@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wsy.netClass.dao.UserDao">
+
+    <resultMap type="User" id="userMap">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="nickname" column="nickname" />
+        <result property="password" column="password" />
+        <result property="role" column="role" />
+        <result property="email" column="email" />
+        <result property="loginDate" column="loginDate" />
+        <result property="createDate" column="createDate" />
+        <result property="loginDateStr" column="loginDateStr" />
+        <result property="createDateStr" column="createDateStr" />
+        <result property="flag" column="status" />
+    </resultMap>
+
+    <sql id="userColumn">
+        id,
+        login_name "username",
+        nickname,
+        password,
+        role,
+        email,
+        login_date "loginDate",
+        create_date "createDate",
+        status,
+       date_format(create_date,'%Y-%m-%d %H:%i:%s') "createDateStr",
+       date_format(login_date,'%Y-%m-%d %H:%i:%s') "loginDateStr"
+    </sql>
+    <select id="selectByUsername" parameterType="string" resultType="User">
+        select <include refid="userColumn"></include>
+        from t_user
+        where login_name=#{username}
+    </select>
+
+    <select id="selectByIdAndUsername" parameterType="User" resultType="User">
+        select <include refid="userColumn"></include>
+        from t_user
+        where login_name=#{username}
+        and id=#{id}
+    </select>
+
+
+
+    <insert id="insertMysql" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        insert into t_user
+        (login_name,nickname,password,role,email,login_date,create_date,status)
+        values
+        (#{username},#{nickname},#{password},#{role},#{email},#{loginDate},now(),#{flag,jdbcType=INTEGER})
+    </insert>
+
+
+
+    <select id="selectByUsernameAndPassword" resultMap="userMap">
+        select <include refid="userColumn"></include>
+        from t_user
+        where login_name=#{username}
+        and password=#{password}
+    </select>
+
+
+    <!-- date_format(now(), '%Y-%m-%d %H:%i:%s') mysql -->
+    <!-- to_char(sysdate, 'yyyy-MM-dd hh24:mm:ss') oracle -->
+    <select id="selectAll" parameterType="User" resultMap="userMap" >
+        select <include refid="userColumn"></include>
+        from t_user
+        <where>
+            <if test="id != null" >and id &lt; #{id}</if>
+            <if test="createDate != null" >and createDate &lt; #{createDate}</if>
+        </where>
+        order by id asc
+    </select>
+
+    <select id="selectByFuzzy" parameterType="User" resultMap="userMap" >
+        select <include refid="userColumn"></include>
+        from t_user
+        <trim prefix="where" prefixOverrides="AND|OR" >
+            <if test="username!=null &amp;&amp; username!=''" >
+                and login_name like concat('%',concat(#{username},'%')) ESCAPE '/'
+            </if>
+            <if test="role!=null and role!=''" >
+                and role like concat('%',concat(#{role},'%'))
+            </if>
+            <if test="nickname!=null and nickname!=''" >
+                and nickname like concat('%',concat(#{nickname},'%')) ESCAPE '/'
+            </if>
+            <if test="email!=null and email!=''" >
+                and email like concat('%',concat(#{email},'%')) ESCAPE '/'
+            </if>
+            <if test="flag!=null" >
+                and status = #{flag}
+            </if>
+            <if test="createStartDate!=null and createStartDate!=''">
+                and create_date &gt; date_format(#{createStartDate},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="createEndDate!=null and createEndDate!=''">
+                and create_date &lt; date_format(#{createEndDate},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="loginStartDate!=null and loginStartDate!=''">
+                and login_date &gt; date_format(#{loginStartDate},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="outStartDate!=null and outStartDate!=''">
+                and login_date &lt; date_format(#{outStartDate},'%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="id!=null" >
+                and id = #{id}
+            </if>
+        </trim>
+    </select>
+
+    <update id="updateUserLoginDate" parameterType="user">
+        update t_user
+        set login_date=#{loginDate}
+        where id = #{id}
+    </update>
+
+    <update id="updateUserStatus" parameterType="user">
+        update t_user
+        set status=#{flag}
+        where id = #{id}
+    </update>
+
+    <update id="updateUser" parameterType="user">
+        update t_user
+        <trim prefix="set" suffixOverrides=",">
+            <if test="nickname!=null and nickname!=''">
+                nickname=#{nickname},
+            </if>
+            <if test="password!=null and password!=''">
+                password=#{password},
+            </if>
+            <if test="role!=null and role!=''">
+                role=#{role},
+            </if>
+            <if test="email!=null and email!=''">
+                email=#{email},
+            </if>
+            <if test="flag!=null and flag!=''">
+                status=#{flag},
+            </if>
+        </trim>
+        where id=#{id}
+    </update>
+
+
+    <update id="updateByName" parameterType="string">
+        update t_user set LOGIN_DATE = sysdate where LOGIN_NAME=#{username}
+    </update>
+
+    <insert id="insert" parameterType="User">
+        insert into
+        t_user
+        (id,login_name,nickname,password,role,email,login_date,create_date,status)
+        values
+        (user_seq.nextval,#{username},#{nickname},#{password},#{role},#{email},#{loginDate,jdbcType=DATE},#{createDate},#{flag})
+    </insert>
+
+    <select id="selectById" parameterType="Integer" resultType="User">
+        select <include refid="userColumn"></include>
+        from t_user
+        where id = #{id}
+    </select>
+
+    <update id="updateByUserName" parameterType="String">
+        update t_user
+        set password=#{password},nickname=#{nickname},email=#{email}
+        where login_name=#{userName};
+    </update>
+</mapper>

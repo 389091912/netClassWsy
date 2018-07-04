@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wsy.netClass.dao.ResourceDao">
+<resultMap type="Resource" id="resourceMapper2">
+			<id property="id" column="id"/>
+			<result property="title" column="title"/>
+			<result property="path" column="path"/>
+			<result property="coverImageUrl" column="cover_image_url"/>
+			<result property="originalName" column="original_name"/>
+			<result property="fileSize" column="file_size"/>
+			<result property="fileType" column="file_type"/>
+			<result property="clickCount" column="click_count"/>
+			<result property="createDate" column="create_date"/>
+			<result property="costType" column="cost_type"/>
+			<result property="costNumber" column="cost_number"/>
+			<result property="userId" column="user_id"/>
+			<result property="chapterId" column="chapter_id"/>
+			<result property="status" column="status"/>
+</resultMap>
+  
+  <sql id="resourceColumn2">
+  			id,
+			title,
+			path,
+			cover_image_url,
+			original_name,
+			file_size,
+			file_type,
+			click_count,
+			create_date ,
+			cost_type,
+			cost_number,
+			user_id,
+			chapter_id,
+			status 
+  </sql>
+	<sql id="ResourceColumn">
+		r.id "id",
+		r.title "title",
+		r.path "path",
+		r.original_name "originalName",
+		r.cover_image_url "coverImageurl",
+		r.file_size "fileSize",
+		r.file_type "fileType",
+		r.click_count "clickCount",
+		r.chapter_id "chapterId",
+		r.create_date "createDate",
+		r.cost_type "costType",
+		r.cost_number "costNumber",
+		r.user_id,
+		r.status "status",
+		u.id "u.id",
+		u.login_name "login_name",
+		date_format(r.create_date,'%Y-%m-%d %H:%i:%s') "createDateStr"
+	</sql>
+
+	<resultMap type="Resource" id="ResourceMap">
+		<id property="id" column="id" />
+		<result property="title" column="title" />
+		<result property="path" column="path" />
+		<result property="coverImageUrl" column="coverImageurl" />
+		<result property="originalName" column="originalName" />
+		<result property="fileSize" column="fileSize" />
+		<result property="fileType" column="fileType" />
+		<result property="clickCount" column="clickCount" />
+		<result property="createDate" column="createDate" />
+		<result property="chapterId" column="chapterId" />
+		<result property="costType" column="costType" />
+		<result property="costNumber" column="costNumber" />
+		<result property="status" column="status" />
+		<result property="createDateStr" column="createDateStr" />
+		<association property="user" column="r.user_id" javaType="user">
+			<id property="id" column="u.id" />
+			<result property="username" column="login_name" />
+		</association>
+		<!-- <association property="Chapter" column="r.chapter_id" javaType="chapter"> 
+			<id property="id" column="c.id"></id> <result property="title" column="c_title"/> 
+			<result property="status" column="c_status"/> </association> -->
+	</resultMap>
+
+
+	<!-- <select id="selectAllByParamete01" parameterType="Resource" resultMap="ResourceMap">
+		select<include refid="ResourceColumn"/>
+		from T_RESOURCE r
+		left join t_user u on u.id = r.user_id
+		<trim prefix="where" prefixOverrides="AND|OR">
+			<if test="title!=null and title!=''">
+				and title likeconcat('%',concat(#{title},'%'))
+  			</if>
+  		</trim>
+  	</select>	 -->	
+  			
+  			
+  <select id="selectResourceById" parameterType="integer" resultMap="resourceMapper2">
+  select <include refid="resourceColumn2"></include>
+  from t_resource
+  where id=#{id}
+  </select>
+
+	<select id="selectResourceByTitle" parameterType="Resource" resultMap="resourceMapper2">
+     select <include refid="resourceColumn2"></include>
+     from t_resource
+     where title=#{title}
+  </select>
+  
+  <select id="selectUserIdAndTitle" resultMap="resourceMapper2">
+  	select<include refid="resourceColumn2" />
+	from t_resource
+	where title=#{1} and user_id=#{0}
+  </select>
+
+	<update id="updateStatus" parameterType="Resource">
+		update t_resource
+		set status=#{status}
+		WHERE id=#{id}
+	</update>
+
+
+  <update id="updateResource" parameterType="Resource">
+  	update t_resource
+  	<set>
+		<if test="title!=null and title!=''" >
+			title=#{title},
+		</if>
+		<if test="path!=null and path!=''" >
+			path=#{path},
+		</if>
+		<if test="coverImageUrl!=null and coverImageUrl!=''" >
+			cover_image_url=#{coverImageUrl},
+		</if>
+		<if test="originalName!=null and originalName!=''" >
+			original_name=#{originalName},
+		</if>
+	<!-- 	<if test="fileSize!=null and fileSize=''" >
+			file_size=#{fileSize},
+		</if> -->
+		<if test="fileType!=null and fileType!=''" >
+			file_type=#{fileType},
+		</if>
+		<if test="clickCount!=null" >
+			click_count=#{clickCount},
+		</if>
+		<if test="costType!=null" >
+			cost_type=#{costType},
+		</if>
+		<if test="costNumber!=null" >
+			cost_number=#{costNumber},
+		</if>
+		<if test="status!=null" >
+			status=#{status},
+		</if>
+		<if test="createDate!=null" >
+			create_date=#{createDate},
+		</if>
+		<if test="chapter!=null and chapter.id!=''" >
+			chapter_id=#{chapter.id},
+		</if>
+  	</set>
+  	where
+  		id = #{id}
+  </update>
+  
+  	<select id="selectAllByParameter" parameterType="Resource" resultMap="ResourceMap">
+  		select<include refid="ResourceColumn" />
+		from T_RESOURCE r
+  	   left join t_user u on u.id = r.user_id
+  	   <trim prefix="where" prefixOverrides="AND|OR" >
+		   <if test="id!=null">
+			   and r.id &lt; #{id}
+		   </if>
+			<if test="title!=null and title!=''" >
+				and r.title like concat('%',concat(#{title},'%'))
+			</if>
+			<if test="userId!=null">
+				and r.user_id =#{userId}
+			</if>
+		   <if test="createDate!=null">
+			   and createDate &lt;#{createDate}
+		   </if>
+			<if test="user.username!=null and user.username!='' ">
+				and login_name like concat('%',concat(#{user.username},'%'))
+			</if>
+			<if test="createStartDate!=null and createStartDate!=''">
+				and r.create_date &gt; date_format(#{createStartDate},'%Y-%m-%d %H:%i:%s')
+			</if>
+			<if test="createEndDate!=null and createEndDate!=''">
+				and r.create_date &lt; date_format(#{createEndDate},'%Y-%m-%d %H:%i:%s')
+			</if>
+			<if test="status==1 or status==0">
+				and r.status =#{status}
+			</if>
+			<if test="fileType!=null and fileType!=''">
+				and r.file_type like concat('%',concat(#{fileType},'%'))
+			</if>
+		</trim>
+		order by id desc
+	</select>
+
+	<select id="selectFrontByParameter" parameterType="Resource" resultMap="ResourceMap">
+		select<include refid="ResourceColumn" />
+		from T_RESOURCE r
+		left join t_user u on u.id = r.user_id
+		<trim prefix="where" prefixOverrides="AND|OR" >
+			<if test="id!=null">
+				and r.id &lt; #{id}
+			</if>
+			<if test="title!=null and title!=''" >
+				and r.title like concat('%',concat(#{title},'%'))
+			</if>
+			<if test="userId!=null">
+				and r.user_id =#{userId}
+			</if>
+			<if test="createDate!=null">
+				and createDate &lt;#{createDate}
+			</if>
+
+			<if test="status==1 or status==0">
+				and r.status =#{status}
+			</if>
+			<if test="fileType!=null and fileType!=''">
+				and r.file_type like concat('%',concat(#{fileType},'%'))
+			</if>
+		</trim>
+		order by id desc
+	</select>
+
+	<insert id="insertResource">
+	insert into t_resource(
+		title,path,cover_image_url,original_name,file_size,file_type,click_count,
+		create_date,cost_type,cost_number,status,user_id)
+	values (#{title},#{path},#{coverImageUrl},#{originalName},#{fileSize},
+			#{fileType},#{clickCount},now(),#{costType},#{costNumber},#{status},
+			#{userId})
+  </insert>
+
+</mapper>

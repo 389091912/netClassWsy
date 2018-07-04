@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wsy.netClass.dao.UserResourceDao">
+<resultMap type="UserResource" id="userResourceMapper">
+	<result property="id"  column="id"/>
+	<result property="userId"  column="user_id"/>
+	<result property="resourceId"  column="resource_id"/>
+	<result property="createDate"  column="create_date"/>
+	<result property="updateDate"  column="update_date"/>
+</resultMap>
+
+
+    <resultMap type="UserResource" id="userResourceMapper01">
+        <result property="id"  column="ur.id"/>
+        <result property="userId"  column="ur.user_id"/>
+        <result property="createDate"  column="ur.create_date"/>
+        <result property="updateDate"  column="ur.update_date"/>
+        <result property="updateDateStr"  column="updateDateStr"/>
+        <association property="resource" column="ur.resource_id" javaType="Resource">
+            <id property="id" column="r.id"/>
+            <result property="title" column="r.title"/>
+            <result property="status" column="r.status"/>
+        </association>
+    </resultMap>
+
+<sql id="userResourceColumn">
+	id,
+	user_id,
+	resource_id,
+	create_date,
+	update_date
+</sql>
+
+    <sql id="userResourceColumn01">
+        ur.id "ur.id",
+        ur.user_id "ur.user_id",
+        ur.resource_id "ur.resource_id",
+        ur.create_date "ur.create_date",
+        ur.update_date "ur.update_date",
+        r.id "r.id",
+        r.title "r.title",
+        r.path "r.path",
+        r.status "r.status",
+        date_format(update_date, '%Y-%m-%d %H:%i:%s') "updateDateStr"
+    </sql>
+
+    <select id="selectUserResource" parameterType="UserResource"  resultMap="userResourceMapper01">
+        SELECT<include refid="userResourceColumn01"/>
+        FROM t_user_resource ur
+      LEFT JOIN t_resource r ON ur.resource_id = r.id
+        <trim prefix="where" prefixOverrides="AND|OR" >
+            <if test="id!=null">
+                and ur.id &lt; #{id}
+            </if>
+            <if test="userId!=null">
+                and ur.user_id=#{userId}
+            </if>
+        </trim>
+        order by update_date desc
+    </select>
+
+
+
+
+<select id="selectUrByAndId" parameterType="UserResource"  resultMap="userResourceMapper">
+	select <include refid="userResourceColumn"></include>
+	from t_user_resource
+	where user_id=#{userId}
+			and resource_id=#{resourceId}
+</select>
+
+<insert id="insertUr" parameterType="UserResource">
+	insert into t_user_resource
+	(user_id,  resource_id,  create_date,  update_date)
+	values
+	(#{userId},#{resourceId},now(),#{updateDate})
+</insert>
+
+<update id="updateUpdateByTwoId" parameterType="UserResource">
+		update t_user_resource
+		set
+		update_date=#{updateDate}
+		where user_id=#{userId}
+				and resource_id=#{resourceId}
+</update>
+
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <!--1..MVC 驱动注解-->
+    <mvc:annotation-driven/>
+
+    <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>
+
+    <!--2..配置ViewResolver-->
+    <context:component-scan base-package="com.wsy.netClass.controller"/>
+
+    <!--配置view Resolver-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<!--
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+-->
+        <property name="prefix" value="/WEB-INF/view/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--配置访问资源-->
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/css/**" location="/css/"/>
+    <mvc:resources mapping="/images/**" location="images/"/>
+    <mvc:resources mapping="/fonts/**" location="/fonts/"/>
+    <mvc:resources mapping="/iconfont/**" location="/iconfont/"/>
+    <mvc:resources mapping="/json/**" location="/json/"/>
+    <mvc:resources mapping="/upload/**" location="/upload/"/>
+    <mvc:default-servlet-handler/>
+    <!--登陆页面-->
+    <mvc:view-controller path="/backLogin" view-name="back_login"/>
+    <mvc:view-controller path="/backMain" view-name="back_Home"/>
+    <mvc:view-controller path="/back_userSet" view-name="back_userSet"/>
+    <mvc:view-controller path="/back_commentManageSet" view-name="back_commentManageSet"/>
+    <mvc:view-controller path="/back_commentSet" view-name="back_commentSet"/>
+    <mvc:view-controller path="/back_courseReourceSet" view-name="back_courseReourceSet"/>
+    <mvc:view-controller path="/back_courseTypeSet" view-name="back_courseTypeSet"/>
+    <mvc:view-controller path="/back_resourceDetailSet" view-name="back_resourceDetailSet"/>
+    <mvc:view-controller path="/back_resourceSet" view-name="back_resourceSet"/>
+    <mvc:view-controller path="/back_resourceTypeSet" view-name="back_resourceTypeSet"/>
+    <mvc:view-controller path="/back_courseSet" view-name="back_courseSet"/>
+    <mvc:view-controller path="/front_index" view-name="front_index"/>
+    <mvc:view-controller path="/front_mycourse" view-name="front_mycourse"/>
+    <mvc:view-controller path="/front_record" view-name="front_record"/>
+    <mvc:view-controller path="/front_select" view-name="front_select"/>
+    <mvc:view-controller path="/front_courseDetail" view-name="front_courseDetail"/>
+
+    <mvc:annotation-driven>
+
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8" />
+            </bean>
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter"/>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+
+</beans>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wsy.netClass.dao.GoldPointsDao">
+
+	<sql id="goldPointsColumn">
+		id,
+		user_id "userId",
+		point_count "pointCount",
+		gold_count "goldCount",
+		info,
+		create_date "createDate"
+	</sql>
+	<resultMap type="goldPoints" id="goldPointsMap">
+		<id property="id" column="id" />
+		<result property="pointCount" column="pointCount" />
+		<result property="goldCount" column="goldCount" />
+		<result property="info" column="info" />
+		<result property="createDate" column="createDate" />
+		<association property="user" column="userId" javaType="user">
+			<id property="id" column="userId"/>
+		</association>
+	</resultMap>
+
+	<resultMap type="goldPoints" id="goldPointsMap1">
+		<result property="pointCount" column="sum(point_count)" />
+		<result property="goldCount" column="sum(gold_count)" />
+	</resultMap>
+
+	<select id="selectPointAndGold" resultMap="goldPointsMap1">
+		select sum(point_count),sum(gold_count)
+		from t_gold_points t
+		left join t_user u on u.id = t.user_id
+		where t.user_id=#{userId}
+	</select>
+
+	<select id="selectByUser" parameterType="goldPoints" resultMap="goldPointsMap">
+		select
+		<include refid="goldPointsColumn"></include>
+		from t_gold_points
+		where user_id =#{userId}
+		order by create_date desc
+	</select>
+	<insert id="insertGoldPoints" parameterType="goldPoints">
+		insert into
+		 t_gold_points
+		 (user_id,point_count,gold_count,info,create_date)
+		values
+		(#{userId},#{pointCount},#{goldCount},#{info},now())
+	</insert>
+
+	<select id="selectGpByUserId" resultMap="goldPointsMap">
+		select
+		<include refid="goldPointsColumn"></include>
+		from t_gold_points
+		where user_id=#{userId}
+	</select>
+
+</mapper>
+
